@@ -64,7 +64,9 @@ def parse_args():
     parser.add_argument('--daily_y_path', type=str, default='test/SSM/')
     parser.add_argument('--saved_model_path', type=str, default='/CLFS/saved_model/')
     parser.add_argument('--saved_forecast_path', type=str, default='/CLFS/outputs/')
+
     parser.add_argument('--inputs_path', type=str, default='/CLFS/inputs/SMAP_L4')    
+    parser.add_argument('--outputs_path', type=str, default='/CLFS/inputs/SMAP_L4')    
 
     # basic 
     parser.add_argument('--begin_train_date', type=str, default='2015-05-31')
@@ -80,15 +82,18 @@ def parse_args():
 
     # data 
     parser.add_argument('--len_input', type=int, default=7)
-    #NOTE: 0 for ideal, 2 for operational
+    parser.add_argument('--len_out',type=int, default=16)
+    parser.add_argument('--h_w', type=int, default=112)
+    parser.add_argument('--n_forcing_feat', type=int, default=7)
+    parser.add_argument('--n_gfs_feat', type=int, default=3)
+
     parser.add_argument('--window_size', type=int, default=0)
     parser.add_argument('--use_lag_y', type=bool, default=False)
     parser.add_argument('--fillvalue', type=float, default=-9999)
     parser.add_argument('--train_test_ratio', type=float, default=0.2)
-    parser.add_argument('--use_GFS', type=bool, default=True)
 
     # model paramters
-    parser.add_argument('--epochs', type=int, default=50)
+    parser.add_argument('--epochs', type=int, default=40)
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--loss', type=str, default='mse')
     parser.add_argument('--learning_rate', type=float, default=0.001)
@@ -101,16 +106,8 @@ def parse_args():
     parser.add_argument('--kernel_size', type=int, default=5)
     parser.add_argument('--padding', type=str, default='same')
     parser.add_argument('--kernel_initializer', type=str, default='he_normal')
-    parser.add_argument('--len_out',type=int, default=16)
-    parser.add_argument('--cnn_inputs_shape', type=tuple, default=(112, 112, 8))
     parser.add_argument('--model_name', type=str, default='convlstm_tf')
     parser.add_argument('--validation_split', type=float,default=0.2)
     parser.add_argument('--shuffle_times', type=int,default=10000)
-    #NOTE:24 for add GFS, 8 for original
-    parser.add_argument('--convlstm_inputs_shape', type=tuple, default=(7, 112, 112, 10)) 
-    parser.add_argument('--gfs_inputs_shape', type=tuple, default=(16, 112, 112, 3)) 
-
-    parser.add_argument('--att_type', type=str, default='se')
-
 
     return parser.parse_args()

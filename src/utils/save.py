@@ -83,11 +83,3 @@ class Matrix2Raster():
 
         del dataset
 
-
-class SaveImage():
-    def __init__(self):
-        pass
-
-    def __call__(self, X, *args: Any, **kwds: Any) -> Any:
-        
-

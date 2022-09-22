@@ -4,23 +4,13 @@ from tensorflow.keras.callbacks import (EarlyStopping, LearningRateScheduler,
                                         ModelCheckpoint)
 from wandb.keras import WandbCallback
 
-from ray import tune
-
-class TuneReporterCallback(tf.keras.callbacks.Callback):
-    """Tune Callback for Keras.
-    
-    The callback is invoked every epoch.
-    """
-
-    def __init__(self, logs={}):
-        self.iteration = 0
-        super(TuneReporterCallback, self).__init__()
-
-    def on_epoch_end(self, batch, logs={}):
-        self.iteration += 1
-        tune.report(keras_info=logs, mean_accuracy=logs.get("accuracy"), mean_loss=logs.get("loss"))
 
 class CallBacks():
+    """Callback class for keras training, 
+    1. save best models during training;
+    2. early stopping if out patience;
+    3. wandb watch;
+    4. exp decay of learning rate; """
 
     def __init__(
             self,
@@ -56,16 +46,16 @@ class CallBacks():
                           verbose=1,
                           patience=self.esPatience))
 
-        self.callbacks.append(
-            WandbCallback(monitor=self.mcMonitor,
-                          mode=self.mcMode,
-                          log_weights=False,
-                          log_gradients=False))
+        #self.callbacks.append(
+        #    WandbCallback(monitor=self.mcMonitor,
+        #                  mode=self.mcMode,
+        #                  log_weights=False,
+        #                  log_gradients=False))
 
         self.callbacks.append(
             LearningRateScheduler(
                 self.make_exp_decay_lr_schedule(
-                    rate=0.1,
+                    rate=0.1, # see APPENDIX B
                     start_epoch=3,  # Start reducing LR after 3 epochs
                     end_epoch=np.inf,
                 )))
@@ -84,10 +74,9 @@ class CallBacks():
 
             if epoch >= start_epoch and epoch < end_epoch:
                 lr = lr * np.math.exp(-rate)
-
             if verbose:
                 print('\nSetting learning rate to: {}\n'.format(lr))
-
             return lr
-
         return lr_scheduler_exp_decay
+
+
