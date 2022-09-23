@@ -1,5 +1,5 @@
-program: train.py
-project: HRSEPP
+program: run.py
+project: HybridHydro
 name: bayes_sweep
 method: bayes
 metric:
@@ -8,23 +8,16 @@ metric:
 early_terminate:
   type: envelope
 parameters:
-  learning_rate:
-    distribution: log_uniform
-    min: -11.5129
-    max: -4.605
+  # tuning hidden size and batch size; APPENDIX B
   n_filters_factor:
-    distribution: log_uniform
-    min: -0.693
-    max: 0.693
-  batch_size:
     distribution: categorical
     values: [1, 2, 4]
-  filter_size:
+  batch_size:
     distribution: categorical
-    values: [3, 5]
+    values: [16, 32, 64]
 command:
   - ${env}
   - python3
   - ${program}
-  - "--wandb"
+  #- "--wandb"
   - ${args}

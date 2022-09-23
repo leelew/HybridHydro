@@ -10,7 +10,7 @@ def convlstm(configs):
     inputs = Input(shape=(configs.len_input, 
                         configs.h_w, 
                         configs.h_w, 
-                        configs.n_forcing_feat))
+                        configs.n_forcing_feat+1))
 
     # encoder
     outputs = tf.keras.layers.ConvLSTM2D(
@@ -63,7 +63,7 @@ def convlstm_drive(configs):
     inputs = Input(shape=(configs.len_input, 
                         configs.h_w, 
                         configs.h_w, 
-                        configs.n_forcing_feat+configs.n_gfs_feat))        
+                        configs.n_forcing_feat+configs.n_gfs_feat+1))        
 
     # encoder
     outputs = tf.keras.layers.ConvLSTM2D(
@@ -116,7 +116,7 @@ def convlstm_condition(configs):
     inputs = Input(shape=(configs.len_input, 
                           configs.h_w, 
                           configs.h_w, 
-                          configs.n_forcing_feat)) # 7, 112, 112, ..
+                          configs.n_forcing_feat+1)) # 7, 112, 112, ..
     inputs_cond = Input(shape=(configs.len_out, 
                                configs.h_w, 
                                configs.h_w, 
@@ -171,7 +171,7 @@ def convlstm_att_condition(configs):
     inputs = Input(shape=(configs.len_input, 
                           configs.h_w, 
                           configs.h_w, 
-                          configs.n_forcing_feat)) # 7, 112, 112, ..
+                          configs.n_forcing_feat+1)) # 7, 112, 112, ..
     inputs_cond = Input(shape=(configs.len_out, 
                                configs.h_w, 
                                configs.h_w, 
@@ -201,18 +201,17 @@ def convlstm_att_condition(configs):
     # decoder
     outs = []
     for i in range(configs.len_out):
-        # condition GFS
-        x_cond = inputs_cond[:, i:i+1]
-        x_h = tf.keras.layers.Dense(1)(h)
-        x_h = tf.expand_dims(x_h, axis=1)
-        x = tf.concat([x_cond, x_h], axis=-1) # (none, lat, lon, 4)
+        x_cond = inputs_cond[:, i:i+1] #condition input
+        x_h = tf.expand_dims(Dense(1)(h), axis=1) #dl forecast
+        x = tf.concat([x_cond, x_h], axis=-1) #concat
+
         x_att = GlobalAveragePooling2D()(x) #eq.A1
         beta = Dense(x.shape[-1]//2)(x_att) #eq.A2
-        beta = Dense(x.shape[-1])(beta) #eq.A3
-        x_att = Multiply()([x, beta])
-        x_att = tf.keras.layers.Dense(1)(x_att)
-        x = tf.concat([x,x_att], axis=1)
-        x = tf.keras.layers.Dense(1)(x)
+        beta = Dense(x.shape[-1])(beta) 
+        x_att = Dense(1)(Multiply()([x, beta])) #eq.A3
+
+        x = tf.concat([x,x_att], axis=1) #f(x)+x, residual block
+        x = tf.keras.layers.Dense(1)(x) #condese all info
 
         outputs, h, c = ConvLSTM2D(8*configs.n_filters_factor, 
                 configs.kernel_size, 
