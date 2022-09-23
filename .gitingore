@@ -1,6 +1,0 @@
-input/
-output/forecast/
-output/saved_model/
-*.log
-logs/
-

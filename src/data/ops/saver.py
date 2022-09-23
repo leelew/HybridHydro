@@ -4,7 +4,6 @@ import numpy as np
 
 
 def nc_saver(save_path, var_name, date, lon_2d, lat_2d, X):
-
     # save to nc files
     filename = 'SMAP_L4_{var_name}_{year}{month:02}{day:02}.nc'.format(
         var_name=var_name, year=date.year, month=date.month, day=date.day)

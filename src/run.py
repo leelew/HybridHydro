@@ -5,6 +5,7 @@ import os
 import time
 import numpy as np
 import wandb
+import xarray as xr
 
 from config import parse_args
 from data.data_generator import DataGenerator
@@ -18,7 +19,8 @@ def main(configs):
 
     # load land mask of sub-task
     print('.............................................................')
-    print("Please ensure that raw data is preprocessed and saved in {}, Let's Go!".format(configs.inputs_path))
+    print("Please ensure that raw data is preprocessed"+
+          "and saved in {}, Let's Go!".format(configs.inputs_path))
     print('.............................................................')
     print('[HybridHydro] Loading land mask')
     id = configs.id
@@ -36,10 +38,26 @@ def main(configs):
     x_test = np.load(configs.inputs_path + '{}/X_valid_{}.npy'.format(id, id))
     y_train = np.load(configs.inputs_path + '{}/y_train_{}.npy'.format(id, id))
     y_test = np.load(configs.inputs_path + '{}/y_valid_{}.npy'.format(id, id))
+    num_train_sample = x_train.shape[0]
+    num_test_sample = x_test.shape[0]
     print('.............................................................')
 
 
-    #FIXME(lilu): load static vars 
+    # load static vars 
+    print('[HybridHydro] Loading ancillary data')
+    if configs.use_ancillary:
+        with xr.open_dataset(configs.inputs_path+'LC_CN_EASE_9km.nc') as f:
+            lc = np.array(f.land_cover)[np.newaxis,np.newaxis,
+                lat_id_low:lat_id_low + 112, lon_id_left:lon_id_left + 112]
+        with xr.open_dataset(configs.inputs_path+'DEM_CN_EASE_9km.nc') as f:
+            dem = np.array(f.dem)[np.newaxis,np.newaxis,
+                lat_id_low:lat_id_low + 112, lon_id_left:lon_id_left + 112]
+        ancil = np.concatenate([lc,dem],axis=1)
+        ancil_train = np.tile(ancil, (num_train_sample,1,1,1))
+        ancil_test = np.tile(ancil,(num_test_sample,1,1,1))
+        x_train = np.concatenate([x_train,ancil_train],axis=1)
+        x_test = np.concatenate([x_test,ancil_test],axis=1)
+    print('.............................................................')
 
 
     # load gfs
@@ -54,10 +72,7 @@ def main(configs):
 
     # generate input/output for DL models
     print('[HybridHydro] Making input data for {} model'.format(configs.model_name))
-    data_manager = DataLoader(len_input=configs.len_input, 
-                              len_output=configs.len_out, 
-                              window_size=configs.window_size, 
-                              use_lag_y=configs.use_lag_y)
+    data_manager = DataLoader(configs)
 
     if configs.model_name == 'convlstm':
         X, y = data_manager([x_train, x_test], [y_train, y_test])
@@ -80,7 +95,7 @@ def main(configs):
 
     # train & inference DL
     print('[HybridHydro] Training {} model'.format(configs.model_name))
-    train(X[0], y[0], configs, land_mask)
+    loss = train(X[0], y[0], configs, land_mask)
     print('[HybridHydro] Inference {} model'.format(configs.model_name))
     y_predict = predict(X[1], configs)
     print('.............................................................')
@@ -94,9 +109,12 @@ def main(configs):
         os.mkdir(path)
     np.save(configs.model_name+'_0p1_f16_{id:02}.npy'.format(id=id), y_predict)
     np.save('SMAPL4_0p1_f16_{id:02}.npy'.format(id=id), y_test)
+    np.save('loss_{id:02}_{model}.npy'.format(id=id,model=configs.model_name), loss)
     os.system('mv {} {}'.format(configs.model_name+'_0p1_f16_{id:02}.npy'.format(id=id), path))
     os.system('mv {} {}'.format('SMAPL4_0p1_f16_{id:02}.npy'.format(id=id), path))
-    print('[HybridHydro] Finished! You could check the saved models and predictions in path: {}'.format(configs.outputs_path))
+    os.system('mv {} {}'.format('loss_{id:02}_{model}.npy'.format(id=id,model=configs.model_name), path))
+    print('[HybridHydro] Finished! You could check the saved'+
+          'models and predictions in path: {}'.format(configs.outputs_path))
 
 
 if __name__ == '__main__':
