@@ -35,6 +35,15 @@ lon_out = lon_out[idx_lon]
 lat_out = lat_out[idx_lat]
 print(tp_resampled.shape)
 
+# save EASE CN
+f = nc.Dataset('CN_EASE_9km.nc', 'w', format='NETCDF4')
+f.createDimension('longitude', size=tp_resampled.shape[-1])
+f.createDimension('latitude', size=tp_resampled.shape[-2])
+lon0 = f.createVariable('longitude', 'f4', dimensions='longitude')
+lat0 = f.createVariable('latitude', 'f4', dimensions='latitude')
+lon0[:], lat0[:] = lon_out, lat_out
+f.close()
+
 # save China
 f = nc.Dataset('DEM_CN_EASE_9km.nc', 'w', format='NETCDF4')
 f.createDimension('longitude', size=tp_resampled.shape[-1])
