@@ -20,7 +20,7 @@ def train(X, y, configs, mask=None):
             epochs=configs.epochs,
             callbacks=[CallBacks(configs.outputs_path+'saved_model/'+configs.model_name+'/'+str(configs.id)+'/')()],
             validation_split=configs.validation_split)
-    return np.concatenate([history["loss"],history["val_loss"]],axis=-1)
+    return np.concatenate([history.history["loss"],history.history["val_loss"]],axis=-1)
 
 def predict(X, configs):
     md = model(configs)

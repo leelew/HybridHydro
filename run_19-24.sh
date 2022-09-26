@@ -1,7 +1,7 @@
 #!/bin/bash
 
 num_jobs=25
-epochs=40
+epochs=50
 saved_model_path="/tera08/lilu/HybridHydro/output/saved_model/"
 saved_forecast_path="/tera08/lilu/HybridHydro/output/forecast/"
 outputs_path="/tera08/lilu/HybridHydro/output/"

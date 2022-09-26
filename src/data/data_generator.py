@@ -7,7 +7,7 @@ import json
 import numpy as np
 
 from data.ops.init import AuxManager
-from data.ops.make_X_y import make_Xy
+from data.ops.make_Xy import make_Xy
 from data.ops.preprocesser import (RawSMAPPreprocesser, XPreprocesser,
                                    yPreprocesser)
 from data.ops.readers import NCReader
