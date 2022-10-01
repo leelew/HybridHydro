@@ -1,6 +1,6 @@
 import tensorflow as tf
-from tensorflow.keras import Input
-from tensorflow.keras.layers import (ConvLSTM2D, Input, Dense, GlobalAveragePooling2D,
+from tensorflow.keras import Input, backend
+from tensorflow.keras.layers import (Lambda, ConvLSTM2D, Input, Dense, GlobalAveragePooling2D,
                                      Multiply)
 from tensorflow.keras.models import Model
 
@@ -55,6 +55,66 @@ def convlstm(configs):
 
     mdl = Model(inputs, out)
     #mdl.summary()    
+    return mdl
+
+
+def convlstm_v1(configs):
+    inputs = Input(shape=(configs.len_input,
+                        configs.h_w,
+                        configs.h_w,
+                        configs.n_forcing_feat+1))
+
+    outputs = tf.keras.layers.ConvLSTM2D(
+                8*configs.n_filters_factor, 
+                configs.kernel_size, 
+                padding=configs.padding, 
+                kernel_initializer=configs.kernel_initializer, 
+                return_state=False,
+                activation='elu',
+                recurrent_initializer='orthogonal',
+                return_sequences=True,
+                dropout=configs.dropout_rate)(inputs)
+
+    if configs.stats_hs == 0:
+        print('a')
+    else:
+        for i in range(configs.stats_hs):
+
+            outputs = tf.keras.layers.ConvLSTM2D(
+                    8*configs.n_filters_factor, 
+                    configs.kernel_size, 
+                    padding=configs.padding, 
+                    kernel_initializer=configs.kernel_initializer, 
+                    return_state=False,
+                    activation='elu',
+                    recurrent_initializer='orthogonal',
+                    return_sequences=True,
+                    dropout=configs.dropout_rate)(outputs)
+
+    outputs = tf.keras.layers.ConvLSTM2D(
+                8*configs.n_filters_factor, 
+                configs.kernel_size, 
+                padding=configs.padding, 
+                kernel_initializer=configs.kernel_initializer, 
+                return_state=False,
+                activation='elu',
+                recurrent_initializer='orthogonal',
+                return_sequences=False,
+                dropout=configs.dropout_rate)(outputs)
+
+    out = Lambda(lambda x: backend.concatenate([x] * configs.len_out, axis=1))(outputs[:, tf.newaxis])
+    out = ConvLSTM2D(8*configs.n_filters_factor, 
+                     configs.kernel_size, 
+                     padding='same', 
+                     return_sequences=True,
+                     activation='elu',
+                     recurrent_initializer='orthogonal',
+                     dropout=configs.dropout_rate)(out)
+        
+    out = tf.keras.layers.Dense(1)(out)
+
+    mdl = Model(inputs, out)
+    mdl.summary()    
     return mdl
 
 
@@ -116,7 +176,7 @@ def convlstm_condition(configs):
     inputs = Input(shape=(configs.len_input, 
                           configs.h_w, 
                           configs.h_w, 
-                          configs.n_forcing_feat+1)) # 7, 112, 112, ..
+                          configs.n_forcing_feat+3)) # 7, 112, 112, ..
     inputs_cond = Input(shape=(configs.len_out, 
                                configs.h_w, 
                                configs.h_w, 
@@ -205,12 +265,12 @@ def convlstm_att_condition(configs):
         x_h = tf.expand_dims(Dense(1)(h), axis=1) #dl forecast
         x = tf.concat([x_cond, x_h], axis=-1) #concat
 
-        x_att = GlobalAveragePooling2D()(x) #eq.A1
-        beta = Dense(x.shape[-1]//2)(x_att) #eq.A2
-        beta = Dense(x.shape[-1])(beta) 
-        x_att = Dense(1)(Multiply()([x, beta])) #eq.A3
+        #x_att = GlobalAveragePooling2D()(x) #eq.A1
+        #beta = Dense(x.shape[-1]//2)(x_att) #eq.A2
+        #beta = Dense(x.shape[-1])(beta) 
+        #x_att = Dense(1)(Multiply()([x, beta])) #eq.A3
 
-        x = tf.concat([x,x_att], axis=1) #f(x)+x, residual block
+        #x = tf.concat([x,x_att], axis=1) #f(x)+x, residual block
         x = tf.keras.layers.Dense(1)(x) #condese all info
 
         outputs, h, c = ConvLSTM2D(8*configs.n_filters_factor, 
