@@ -15,7 +15,8 @@ from trainer import predict, train
 
 def main(configs):
     """Main process for no backbone model."""
-
+    # wandb init
+    wandb.init("HybridHydro")
 
     # load land mask of sub-task
     print('.............................................................')
@@ -82,6 +83,8 @@ def main(configs):
         X, y = data_manager([x_train, x_test], [y_train, y_test])
     elif configs.model_name in ['convlstm_condition', 'convlstm_att_condition']:
         # construct GFS inputs only for decoder 
+        x_train = np.concatenate([x_train, gfs_id_train], axis=1)
+        x_test = np.concatenate([x_test, gfs_id_test], axis=1)
         X, y = data_manager([x_train, x_test], [y_train, y_test])
         _, X_tf = data_manager([x_train, x_test], [gfs_id_train, gfs_id_test]) 
         X = [[X[0], X_tf[0]], [X[1], X_tf[1]]]
@@ -89,9 +92,6 @@ def main(configs):
     print('[HybridHydro] Training samples shape: {}'.format(y[0].shape[0]))
     print('[HybridHydro] Testing samples shape: {}'.format(y[1].shape[0]))
     print('.............................................................')
-
-    print(X[0].shape, X[1].shape)
-    print(y[0].shape, y[1].shape)
 
     # train & inference DL
     print('[HybridHydro] Training {} model'.format(configs.model_name))
@@ -122,7 +122,5 @@ if __name__ == '__main__':
     configs = parse_args()
     main(configs)
     b = time.time()
-
-    logging.basicConfig(level=logging.INFO, filename='time.log', datefmt='%Y/%m/%d %H:%M:%S')
-    logging.info(b-a)
+    print('[HybridHydro] Cost {} days'.format((b-a)/(3600*24)))
     

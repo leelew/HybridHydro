@@ -25,6 +25,9 @@ configs = parse_args()
 path = configs.outputs_path+'forecast/'+configs.model_name+'/'
 with xr.open_dataset(path+configs.model_name+'_0p1_f16.nc') as f:
     lat, lon, swvl = np.array(f.latitude), np.array(f.longitude), np.array(f.swvl)
+swvl = np.load('/tera03/lilu/work/CLFS/outputs/exp3-best/pred_convlstm_0p1_f16.npy')[:,:,:,:,0]
+#swvl = np.load('/tera03/lilu/work/CLFS/outputs/exp5-pb-tf/pred_convlstm_tf_0p1_f16.npy')[:,:,:,:,0]
+#swvl = np.load('/tera06/lilu/pred_convlstm_0p1_f16.npy')[:,:,:,:,0]
 print("Swvl shape is {}".format(swvl.shape))
 
 # load agme observation
@@ -61,6 +64,7 @@ for i in range(len(lat_agme)):
             r[i, t] = \
                 np.corrcoef(agme[:, t, i], swvl[:, t, index_lat, index_lon])[0, 1]
 
+print(np.nanmean(r,axis=0))
 # save
 np.save('R_'+configs.model_name+'_AGME.npy', r)
 np.save('URMSE_'+configs.model_name+'_AGME.npy', urmse)
