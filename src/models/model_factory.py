@@ -4,10 +4,11 @@ from models import convlstm
 
 def model(configs):
     networks_map = {
-            'convlstm': convlstm.convlstm_v1,#convlstm.convlstm,
+            'convlstm': convlstm.convlstm,
             'convlstm_drive': convlstm.convlstm_drive,
             'convlstm_condition': convlstm.convlstm_condition,
-            'convlstm_att_condition': convlstm.convlstm_att_condition
+            'convlstm_linear_att_condition': convlstm.convlstm_linear_att_condition,
+            'convlstm_se_att_condition': convlstm.convlstm_se_att_condition
         }
     if configs.model_name in networks_map:
         network = networks_map[configs.model_name](configs)

@@ -81,10 +81,8 @@ def main(configs):
         x_train = np.concatenate([x_train, gfs_id_train], axis=1)
         x_test = np.concatenate([x_test, gfs_id_test], axis=1)
         X, y = data_manager([x_train, x_test], [y_train, y_test])
-    elif configs.model_name in ['convlstm_condition', 'convlstm_att_condition']:
+    elif configs.model_name in ['convlstm_condition', 'convlstm_linear_att_condition','convlstm_se_att_condition']:
         # construct GFS inputs only for decoder 
-        x_train = np.concatenate([x_train, gfs_id_train], axis=1)
-        x_test = np.concatenate([x_test, gfs_id_test], axis=1)
         X, y = data_manager([x_train, x_test], [y_train, y_test])
         _, X_tf = data_manager([x_train, x_test], [gfs_id_train, gfs_id_test]) 
         X = [[X[0], X_tf[0]], [X[1], X_tf[1]]]

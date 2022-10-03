@@ -41,13 +41,13 @@ def parse_args():
     parser.add_argument('--n_gfs_feat', type=int, default=3)
 
     parser.add_argument('--window_size', type=int, default=0)
-    parser.add_argument('--use_lag_y', type=bool, default=False)
+    parser.add_argument('--use_lag_y', type=bool, default=True)
     parser.add_argument('--use_ancillary', type=bool, default=False)
     parser.add_argument('--fillvalue', type=float, default=-9999)
     parser.add_argument('--train_test_ratio', type=float, default=0.2)
 
     # model paramters
-    parser.add_argument('--epochs', type=int, default=40)
+    parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--loss', type=str, default='mse')
     parser.add_argument('--stats_hs', type=int, default=0)
@@ -60,7 +60,7 @@ def parse_args():
     parser.add_argument('--kernel_size', type=int, default=5)
     parser.add_argument('--padding', type=str, default='same')
     parser.add_argument('--kernel_initializer', type=str, default='he_normal')
-    parser.add_argument('--model_name', type=str, default='convlstm_tf')
+    parser.add_argument('--model_name', type=str, default='convlstm')
     parser.add_argument('--validation_split', type=float,default=0.2)
     parser.add_argument('--shuffle_times', type=int,default=10000)
 
