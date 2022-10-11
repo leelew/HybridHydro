@@ -1,13 +1,10 @@
 import glob
 import json
 import os
-import sys
-
-sys.path.append('../../../hrsepp/')
+import sys; sys.path.append('../../HybridHydro/')
 import numpy as np
-from numpy.core.numeric import full
 
-from data.ops.readers import RawSMAPReader
+from readers import RawSMAPReader
 
 
 class AuxManager():
