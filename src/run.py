@@ -1,6 +1,5 @@
-from distutils.command.config import config
+import imp
 import json
-import logging
 import os
 import time
 import numpy as np
@@ -8,15 +7,26 @@ import wandb
 import xarray as xr
 
 from config import parse_args
-from data.data_generator import DataGenerator
-from data.data_loader import DataLoader
 from trainer import predict, train
+from data_loader import DataLoader
+from utils import init_fold
 
 
 def main(configs):
     """Main process for no backbone model."""
-    # wandb init
-    wandb.init("HybridHydro")
+    # init fold for work path
+    init_fold(configs.work_path)
+
+    # wandb init important params
+    default = dict(id=configs.id,
+                   # model
+                   model_name=configs.model_name,
+                   n_filters_factor=configs.n_filters_factor,
+                   stats_hs=configs.stats_hs,
+                   # train
+                   batch_size=configs.batch_size,
+                   epochs=configs.epochs)
+    wandb.init("HybridHydro", config=default, allow_val_change=True)
 
     # load land mask of sub-task
     print('.............................................................')
@@ -44,7 +54,7 @@ def main(configs):
     print('.............................................................')
 
 
-    # load static vars 
+    # load static vars
     print('[HybridHydro] Loading ancillary data')
     if configs.use_ancillary:
         with xr.open_dataset(configs.inputs_path+'LC_CN_EASE_9km.nc') as f:
@@ -59,17 +69,18 @@ def main(configs):
         x_train = np.concatenate([x_train,ancil_train],axis=1)
         x_test = np.concatenate([x_test,ancil_test],axis=1)
     print('.............................................................')
-
-
+    
+    
     # load gfs
     print('[HybridHydro] Loading GFS data')
-    gfs_train = np.load(configs.inputs_path+'GFS_0p1_f16_swvl1_interp_2015-2017.npy')
-    gfs_id_train = gfs_train[:, :3, lat_id_low:lat_id_low + 112, lon_id_left:lon_id_left + 112]
-    gfs_test = np.load(configs.inputs_path+'GFS_0p1_f16_swvl1_interp_2018.npy')
-    gfs_id_test = gfs_test[:, :3, lat_id_low:lat_id_low + 112, lon_id_left:lon_id_left + 112]
-    del gfs_train, gfs_test
+    if configs.model_name != 'convlstm':
+        gfs_train = np.load(configs.inputs_path+'GFS_0p1_f3_swvl1_interp_2015-2017.npy')
+        gfs_id_train = gfs_train[:, :3, lat_id_low:lat_id_low + 112, lon_id_left:lon_id_left + 112]
+        gfs_test = np.load(configs.inputs_path+'GFS_0p1_f3_swvl1_interp_2018.npy')
+        gfs_id_test = gfs_test[:, :3, lat_id_low:lat_id_low + 112, lon_id_left:lon_id_left + 112]
+        del gfs_train, gfs_test
     print('.............................................................')
-
+    
 
     # generate input/output for DL models
     print('[HybridHydro] Making input data for {} model'.format(configs.model_name))

@@ -2,7 +2,7 @@ import datetime as dt
 import h5py
 import numpy as np
 
-from data.ops.time import TimeManager
+from time import TimeManager
 import netCDF4 as nc
 
 

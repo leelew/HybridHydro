@@ -1,17 +1,13 @@
 import glob
 import json
 import os
-import sys
-
-from numpy.lib.polynomial import _raise_power
-
-sys.path.append('../../../hrsepp/')
+import sys; sys.path.append('../../HybridHydro/')
 import netCDF4 as nc
 import numpy as np
-from data.ops.init import AuxManager
-from data.ops.readers import RawSMAPReader
-from data.ops.saver import nc_saver
-from data.ops.time import TimeManager
+from init import AuxManager
+from readers import RawSMAPReader
+from saver import nc_saver
+from time import TimeManager
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import MinMaxScaler
 
@@ -72,9 +68,6 @@ class RawSMAPPreprocesser():
 
                 assert len(l) == 8, '[HRSEPP][error]lack data of {}'.format(
                     date)
-
-
-                # 
 
                 # integrate from 3-hour to daily #NOTE:Only suite for SMAP
                 tmp = np.full((len(l), len(

@@ -1,7 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras import losses
 import tensorflow.python.keras.backend as K
-from tensorflow.keras.losses import MeanAbsoluteError
 
 
 
@@ -28,14 +27,6 @@ class LPLoss(losses.Loss):
         return tf.math.reduce_mean(mse)
 
 
-class MaskSeq2seqLoss(losses.Loss):
-    def __init__(self, mask):
-        super().__init__()
-        self.mask = mask
-
-    def call(self, y_true, y_pred):
-        pass
-
 class MaskMSELoss(tf.keras.losses.Loss):
     def __init__(self, mask, add_ssim=False, add_gdl=False, add_mae=False):
         super().__init__()
@@ -45,11 +36,9 @@ class MaskMSELoss(tf.keras.losses.Loss):
         self.add_mae = add_mae
 
     def call(self, y_true, y_pred):
-
         weight = 20*tf.ones_like(y_true)
         m = tf.where(y_true>0.3, weight , 10*weight)
         m = tf.where(y_true<0.1, m , 20*weight)
-
 
         if self.add_gdl:
             gdl = 0
@@ -69,7 +58,6 @@ class MaskMSELoss(tf.keras.losses.Loss):
             mae = tf.math.reduce_mean(m[:, 4:]*tf.abs(y_true[:, 4:]-y_pred[:, 4:]), axis=0)
             mask_mae = tf.math.multiply(mae, self.mask)
             mask_mae = tf.math.reduce_mean(mask_mae)
-            
 
         mse = tf.math.reduce_mean(m*tf.square(y_true - y_pred), axis=0)
         mask_mse = tf.math.multiply(mse, self.mask)
