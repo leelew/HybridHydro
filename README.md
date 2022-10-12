@@ -62,6 +62,10 @@ The forecast of models is shown in forecast path defined in `run.sh`. If you hav
 bash postprocess.sh
 ```
 
+### Edition
+
+HybridHydro has three edition, shown in different branchs.
+
 ### Citation
 
 In case you use HybridHydro in your research or work, please cite:
