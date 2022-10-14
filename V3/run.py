@@ -25,7 +25,7 @@ def main(configs):
         tmp_y = np.load(configs.inputs_path + '{}/y_train_{}.npy'.format(id, id))
         for i in range(4):
             for j in range(4):
-                X, y = data_manager([tmp_x[:,:,i*28:(i+1)*28, i*28:(i+1)*28]], [tmp_y[:,:,i*28:(i+1)*28, i*28:(i+1)*28]])
+                X, y = data_manager([tmp_x[:,:,i*28:(i+1)*28, j*28:(j+1)*28]], [tmp_y[:,:,i*28:(i+1)*28, j*28:(j+1)*28]])
                 print(X[0].shape, y[0].shape)
                 x_train.append(X[0])
                 y_train.append(y[0])
@@ -47,10 +47,10 @@ def main(configs):
         tmp_y = np.load(configs.inputs_path + '{}/y_valid_{}.npy'.format(id, id))
         X, y = data_manager([tmp_x], [tmp_y])
         
-        y_predict = np.zeros_like(y)*np.nan
+        y_predict = np.zeros((342, 16, 112, 112, 1))*np.nan
         for i in range(4):
             for j in range(4):
-                y_predict[:,:,i*28:(i+1)*28, i*28:(i+1)*28] = predict(X[0][:,:,i*28:(i+1)*28, i*28:(i+1)*28], configs)
+                y_predict[:,:,i*28:(i+1)*28, j*28:(j+1)*28] = predict(X[0][:,:,i*28:(i+1)*28, j*28:(j+1)*28], configs)
 
         # save
         print('[HybridHydro] Saving')
