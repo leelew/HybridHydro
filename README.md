@@ -64,7 +64,13 @@ bash postprocess.sh
 
 ### Edition
 
-HybridHydro has three edition, shown in different branchs.
+HybridHydro has five edition, shown in different branchs.
+V1: train local model for each patch (112*112)
+V2: train global model for all patches (112*112)
+V3: train global model for all patches (28*28)
+V4: train local model for each patch based on transfer learning V2 (112*112)
+V5: train local model for each patch based on transfer learning V3 (28*28)
+
 
 ### Citation
 
