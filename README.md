@@ -66,15 +66,15 @@ bash postprocess.sh
 
 HybridHydro has five edition, shown in different branchs.
 
-V1: train local model for each patch (112 x 112)
+[V1](): train local model for each patch (112 x 112)
 
-V2: train global model for all patches (112 x 112)
+[V2](https://github.com/leelew/HybridHydro/tree/V2): train global model for all patches (112 x 112)
 
-V3: train global model for all patches (28 x 28)
+[V3](https://github.com/leelew/HybridHydro/tree/V3): train global model for all patches (28 x 28)
 
-V4: train local model for each patch based on transfer learning V2 (112 x 112)
+[V4](https://github.com/leelew/HybridHydro/tree/V4): train local model for each patch based on transfer learning V2 (112 x 112)
 
-V5: train local model for each patch based on transfer learning V3 (28 x 28)
+[V5](https://github.com/leelew/HybridHydro/tree/V5): train local model for each patch based on transfer learning V3 (28 x 28)
 
 
 ### Citation
