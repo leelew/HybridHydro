@@ -76,6 +76,9 @@ HybridHydro has five edition, shown in different branchs.
 
 [V5](https://github.com/leelew/HybridHydro/tree/V5): train local model for each patch based on transfer learning V3 (28 x 28)
 
+### Notation
+
+1. Add ancillary data (DEM, land cover) would slightly decrease the performance, because it didn't evolute over time, which could harm the transfer between different time steps. Our results in manuscript didn't trained with ancillary data. 
 
 ### Citation
 
