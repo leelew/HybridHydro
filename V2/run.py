@@ -12,19 +12,18 @@ from trainer import predict, train_generator
 
 
 def main(configs):
-    """Main process for no backbone model."""
+    """Train global model with all samples over sub-regions."""
     # wandb init
     wandb.init("HybridHydro-V2")
-    """
+
     # load SMAP L4 and make inputs
+    # NOTE: This operation needs 250GB CPU memory to load all samples.
     x_train, y_train = [], []
     data_manager = DataLoader(configs)
     for id in range(1, 24):
-        print(id)
         tmp_x = np.load(configs.inputs_path + '{}/X_train_{}.npy'.format(id, id))
         tmp_y = np.load(configs.inputs_path + '{}/y_train_{}.npy'.format(id, id))
         X, y = data_manager([tmp_x], [tmp_y])
-        print(X[0].shape, y[0].shape)
         x_train.append(X[0])
         y_train.append(y[0])
     x_train = np.concatenate(x_train, axis=0)
@@ -33,11 +32,9 @@ def main(configs):
     print('[HybridHydro] Training samples shape: {}'.format(num_train_sample))
     print('.............................................................')
 
-
     # train & inference DL
     print('[HybridHydro] Training {} model'.format(configs.model_name))
     loss = train_generator(x_train, y_train, configs)
-    """
     print('[HybridHydro] Inference {} model'.format(configs.model_name))
     data_manager = DataLoader(configs)
     for id in range(1, 25):
@@ -55,10 +52,8 @@ def main(configs):
             os.mkdir(path)
         np.save(configs.model_name+'_0p1_f16_{id:02}.npy'.format(id=id), y_predict)
         np.save('SMAPL4_0p1_f16_{id:02}.npy'.format(id=id), y[0])
-        #np.save('loss_{id:02}_{model}.npy'.format(id=id,model=configs.model_name), loss)
         os.system('mv {} {}'.format(configs.model_name+'_0p1_f16_{id:02}.npy'.format(id=id), path))
         os.system('mv {} {}'.format('SMAPL4_0p1_f16_{id:02}.npy'.format(id=id), path))
-        #os.system('mv {} {}'.format('loss_{id:02}_{model}.npy'.format(id=id,model=configs.model_name), path))
         print('[HybridHydro] Finished! You could check the saved'+
             'models and predictions in path: {}'.format(configs.outputs_path))
 
