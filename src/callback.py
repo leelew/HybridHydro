@@ -55,7 +55,7 @@ class CallBacks():
         self.callbacks.append(
             LearningRateScheduler(
                 self.make_exp_decay_lr_schedule(
-                    rate=0.1, # see APPENDIX B
+                    rate=0.1, # see APPENDIX A
                     start_epoch=3,  # Start reducing LR after 3 epochs
                     end_epoch=np.inf,
                 )))

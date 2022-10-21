@@ -1,6 +1,6 @@
 #!/bin/bash
 source /home/lilu/anaconda3/bin/activate /home/lilu/anaconda3/envs/lilu
-num_jobs=2
+num_jobs=25
 root_path="/work"
 work_path=$root_path"/HybridHydro/"
 saved_model_path=$root_path"/HybridHydro/output/saved_model/"

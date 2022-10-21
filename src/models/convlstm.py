@@ -255,13 +255,13 @@ def convlstm_se_att_condition(configs):
         x = tf.concat([x_cond, x_h], axis=-1)  # concat
 
         # SE-block
-        x_att = GlobalAveragePooling2D()(x)  # eq.A1
+        x_att = GlobalAveragePooling2D()(x[:,0])  # eq.A1
         beta = Dense(x.shape[-1]//2)(x_att)  # eq.A2
         beta = Dense(x.shape[-1])(beta)
         x_att = Dense(1)(Multiply()([x, beta]))  # eq.A3
 
         # give weight for (f(x), x, att(x)) 
-        x = tf.concat([x, x_att], axis=1)  # f(x)+x, residual block
+        x = tf.concat([x, x_att], axis=-1)  # f(x)+x, residual block
         x = Dense(1)(x)  # activate
 
         outputs, h, c = ConvLSTM2D(8*configs.n_filters_factor,

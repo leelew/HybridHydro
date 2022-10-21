@@ -7,7 +7,7 @@ import wandb
 import xarray as xr
 
 from config import parse_args
-from trainer import predict, train
+from trainer import train_generator, predict, train
 from data_loader import DataLoader
 from utils import init_fold
 
@@ -56,13 +56,17 @@ def main(configs):
 
     # load static vars
     print('[HybridHydro] Loading ancillary data')
+    # NOTE: The model performance will slightly decrease after add ancillary data,
+    #       because this data didn't evolute over temporal. Please be careful!
     if configs.use_ancillary:
-        with xr.open_dataset(configs.inputs_path+'LC_CN_EASE_9km.nc') as f:
-            lc = np.array(f.land_cover)[np.newaxis,np.newaxis,
+        lc = np.load(configs.inputs_path+'LC_CN_EASE_9km.npy')[np.newaxis,np.newaxis,
                 lat_id_low:lat_id_low + 112, lon_id_left:lon_id_left + 112]
-        with xr.open_dataset(configs.inputs_path+'DEM_CN_EASE_9km.nc') as f:
-            dem = np.array(f.dem)[np.newaxis,np.newaxis,
+        dem = np.load(configs.inputs_path+'DEM_CN_EASE_9km.npy')[np.newaxis,np.newaxis,
                 lat_id_low:lat_id_low + 112, lon_id_left:lon_id_left + 112]
+        assert ~np.isnan(dem).all()
+        assert ~np.isnan(lc).all()
+        dem[np.isnan(dem)] = np.nanmean(dem)
+        lc[np.isnan(lc)] = np.nanmean(lc)
         ancil = np.concatenate([lc,dem],axis=1)
         ancil_train = np.tile(ancil, (num_train_sample,1,1,1))
         ancil_test = np.tile(ancil,(num_test_sample,1,1,1))
@@ -101,9 +105,11 @@ def main(configs):
     print('[HybridHydro] Training samples shape: {}'.format(y[0].shape[0]))
     print('[HybridHydro] Testing samples shape: {}'.format(y[1].shape[0]))
     print('.............................................................')
-
+    
     # train & inference DL
     print('[HybridHydro] Training {} model'.format(configs.model_name))
+    # NOTE: We also provide `train_generator` to save GPU memory. 
+    #       Please see branch V2 codes. 
     loss = train(X[0], y[0], configs, land_mask)
     print('[HybridHydro] Inference {} model'.format(configs.model_name))
     y_predict = predict(X[1], configs)

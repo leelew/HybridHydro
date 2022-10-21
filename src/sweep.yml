@@ -8,7 +8,7 @@ metric:
 early_terminate:
   type: envelope
 parameters:
-  # tuning hidden size and batch size; APPENDIX B
+  # tuning hidden size and batch size; APPENDIX A
   n_filters_factor:
     distribution: categorical
     values: [1, 2, 4]

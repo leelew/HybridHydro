@@ -28,9 +28,6 @@ def postprocess(configs):
         path = configs.outputs_path+'forecast/'+configs.model_name+'/'+str(i)+'/'
         pred[:, :, lat[i-1]:lat[i-1]+112, lon[i-1]:lon[i-1]+112] = \
             np.load(path+configs.model_name+'_0p1_f16_{id:02}.npy'.format(id=i))[:,:,:,:,0]
-        smap[:, lat[i-1]:lat[i-1]+112, lon[i-1]:lon[i-1]+112] = \
-            np.load(path+'SMAPL4_0p1_f16_{id:02}.npy'.format(id=i))[:,0,:,:]
-        
 
     # save to nc
     with xr.open_dataset(configs.inputs_path+"CN_EASE_9km.nc") as f:
@@ -48,21 +45,8 @@ def postprocess(configs):
     lon0[:], lat0[:], data[:] = lon, lat, pred
     f.close()
 
-    f = nc.Dataset('SMAPL4_0p1.nc', 'w', format='NETCDF4')
-    f.createDimension('longitude', size=smap.shape[-1])
-    f.createDimension('latitude', size=smap.shape[-2])
-    f.createDimension('samples', size=smap.shape[-3])
-    lon0 = f.createVariable('longitude', 'f4', dimensions='longitude')
-    lat0 = f.createVariable('latitude', 'f4', dimensions='latitude')
-    data = f.createVariable('swvl', 'f4', 
-        dimensions=('samples','latitude','longitude'))
-    lon0[:], lat0[:], data[:] = lon, lat, smap
-    f.close()
-
-
     path = configs.outputs_path+'forecast/'+configs.model_name+'/'
     os.system('mv {} {}'.format(configs.model_name+'_0p1_f16.nc', path))
-    os.system('mv {} {}'.format('SMAPL4_0p1.nc', path))
 
 if __name__ == '__main__':
     configs = parse_args()

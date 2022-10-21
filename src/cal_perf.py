@@ -13,8 +13,6 @@ configs = parse_args()
 path = configs.outputs_path+'forecast/'+configs.model_name+'/'
 with xr.open_dataset(path+configs.model_name+'_0p1_f16.nc') as f:
     lat, lon, swvl = np.array(f.latitude), np.array(f.longitude), np.array(f.swvl)
-with xr.open_dataset(path+'SMAPL4_0p1.nc') as f:
-    smap = np.array(f.swvl)
 print("Swvl shape is {}".format(swvl.shape))
 
 # load agme observation and make it to (342, 16, nsites)
@@ -25,16 +23,12 @@ print("AGME observation shape is {}".format(AGME_obs.shape))
 n_sites = AGME_obs.shape[-1]
 
 agme = np.full((342, 16, n_sites), np.nan)
-smap_all = np.full((342, 16, 448, 672), np.nan)
 for i in range(7, 349):
     agme[i-7] = AGME_obs[i:i+16]
-    smap_all[i-7] = smap[i:i+16]
-
 
 # calculate r, ubrmse
 r = np.full((len(lat_agme), configs.len_out), np.nan)
 urmse = np.full((len(lat_agme), configs.len_out), np.nan)
-r_smap = np.full((len(lat_agme), configs.len_out), np.nan)
 
 for i in range(len(lat_agme)):
     for t in range(configs.len_out):
@@ -52,8 +46,6 @@ for i in range(len(lat_agme)):
                 unbiased_RMSE(agme[:, t, i], swvl[:, t, index_lat, index_lon])
             r[i, t] = \
                 np.corrcoef(agme[:, t, i], swvl[:, t, index_lat, index_lon])[0, 1]
-            r_smap[i, t] = \
-                np.corrcoef(agme[:, t, i], smap_all[:, t, index_lat, index_lon])[0, 1]
 print(np.nanmean(r,axis=0))
 
 # save
