@@ -4,8 +4,6 @@
 
 [Lu Li](https://www.researchgate.net/profile/Lu-Li-69?ev=hdr_xprf)
 
-NOTES: The paper is not accepted yet, we will provide all outputs (e.g., trained model, plot codes) if our paper is accepted.
-
 ### Introduction
 
 To adequately incorporate physical information to improve pure DL models, we developed a hybrid model based on an attention mechanism and condition hybrid schemes. We further proposed an ensemble model by averaging outputs of various hybrid models using simple average, condition, and attention methods. We applied two proposed models to improve ConvLSTM by GFS forecasts and compared with three widely used hybrid methods based on in-situ and gridded data evaluation. The results showed that the proposed ensemble hybrid model achieves the best general performance among all hybrid models from 1 to 16 days forecasting, and is amenable to different soil conditions. It is highlighted that the ensemble model improves at least 65% of R compared to ConvLSTM for 16-day forecasting, and outperforms it over 79.5% in-situ stations. Moreover, our proposed attention-based hybrid model, which detects 60.6% and 56.8% drought events separately for 1-week and 2-week forecasts, achieves the best drought events predictability over arid, temperate, cold and polar regions. Our findings emphasized that the proposed hybrid models could address the problem of pure DL models on long-term and extreme forecasting and could break the performance ceiling constrained by training datasets.
@@ -82,15 +80,16 @@ HybridHydro has five edition, shown in different branchs.
 
 ### Citation
 
-In case you use HybridHydro in your research or work, please cite:
+NOTES: The paper is not accepted yet. 
+
+In case you use HybridHydro in your research or work, please cite this GitHub codes:
 
 ```bibtex
 @article{Lu Li,
     author = {Lu Li, Yongjiu Dai et al.},
     title = {Soil Moisture Forecasting integrating Physical-based Model with Deep Learning},
     journal = {Journal of Hydrometeorlogy},
-    year = {2022},
-    DOI = {10.1175/JHM-D-21-0206.1}
+    year = {2022}
 }
 ```
 
