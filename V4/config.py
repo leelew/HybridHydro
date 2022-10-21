@@ -17,8 +17,6 @@ def parse_args():
     parser.add_argument('--lon_left', type=int, default=72.3)
     parser.add_argument('--lon_right', type=int, default=135)
 
-
-
     # data params
     parser.add_argument('--len_input', type=int, default=7)
     parser.add_argument('--len_out',type=int, default=16)

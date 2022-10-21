@@ -1,4 +1,3 @@
 # HybridHydro
-hybrid physical-ML models for soil moisture prediction
 
-We will open source the codes after the manuscript is accepted.
+V4 codes is training local models for each sub-regions transfer learning from all other samples (i.e., based on V2 global model).

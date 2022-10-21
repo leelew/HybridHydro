@@ -9,6 +9,7 @@ from models.model_factory import model
 
 def train(X, y, configs, mask=None):
     mdl = model(configs)
+    # load V2 global model before.
     mdl.load_weights(configs.outputs_path+'saved_model/'+configs.model_name+'_V2/')
     mdl.compile(Adam(learning_rate=configs.learning_rate), loss=MaskMSELoss(mask))
     history = mdl.fit(X, y,
@@ -20,9 +21,9 @@ def train(X, y, configs, mask=None):
 
 
 def predict(X, configs):
-    md = model(configs)
-    md.load_weights(configs.outputs_path+'saved_model/'+configs.model_name+'/'+str(configs.id)+'/')
-    y_pred = md.predict(X)
+    mdl = model(configs)
+    mdl.load_weights(configs.outputs_path+'saved_model/'+configs.model_name+'/'+str(configs.id)+'/')
+    y_pred = mdl.predict(X)
     return y_pred
 
 
