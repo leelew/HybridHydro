@@ -1,6 +1,6 @@
 # HybridHydro | Physical-guided ML models
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7174126.svg)](https://doi.org/10.5281/zenodo.7174126)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7180026.svg)](https://doi.org/10.5281/zenodo.7180026)
 
 [Lu Li](https://www.researchgate.net/profile/Lu-Li-69?ev=hdr_xprf)
 
@@ -20,7 +20,7 @@ git clone git@github.com:leelew/HybridHydro.git
 
 **2. Download dataset**
 
-The dataset used in the paper could be download from [zenodo](https://doi.org/10.5281/zenodo.7174126). You could test the repo with downloading each sub-tasks rather than the whole data. Please make an `input` dir and move download data into this fold.
+The dataset used in the paper could be download from [zenodo](https://doi.org/10.5281/zenodo.7180026). You could test the repo with downloading each sub-tasks rather than the whole data. Please make an `input` dir and move download data into this fold.
 
 **3. Wandb init**
 
