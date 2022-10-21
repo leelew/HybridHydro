@@ -17,12 +17,10 @@ def parse_args():
     parser.add_argument('--lon_left', type=int, default=72.3)
     parser.add_argument('--lon_right', type=int, default=135)
 
-
-
     # data params
     parser.add_argument('--len_input', type=int, default=7)
     parser.add_argument('--len_out',type=int, default=16)
-    parser.add_argument('--h_w', type=int, default=28)
+    parser.add_argument('--h_w', type=int, default=28) # from 112 to 28 
     parser.add_argument('--n_forcing_feat', type=int, default=7)
     parser.add_argument('--n_gfs_feat', type=int, default=3)
     parser.add_argument('--window_size', type=int, default=0)
@@ -37,7 +35,7 @@ def parse_args():
     parser.add_argument('--work_path', type=str, default='/work/HybridHydro/')
 
     # model params
-    parser.add_argument('--epochs', type=int, default=1)
+    parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--batch_size', type=int, default=16)
     parser.add_argument('--loss', type=str, default='mse')
     parser.add_argument('--stats_hs', type=int, default=0)

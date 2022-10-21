@@ -1,4 +1,3 @@
 # HybridHydro
-hybrid physical-ML models for soil moisture prediction
 
-We will open source the codes after the manuscript is accepted.
+V3 codes is nearly the same with V2 codes, but decrease spatial size of input features(see params `h_w`).
