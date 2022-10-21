@@ -17,10 +17,12 @@ def parse_args():
     parser.add_argument('--lon_left', type=int, default=72.3)
     parser.add_argument('--lon_right', type=int, default=135)
 
+
+
     # data params
     parser.add_argument('--len_input', type=int, default=7)
     parser.add_argument('--len_out',type=int, default=16)
-    parser.add_argument('--h_w', type=int, default=112)
+    parser.add_argument('--h_w', type=int, default=28)
     parser.add_argument('--n_forcing_feat', type=int, default=7)
     parser.add_argument('--n_gfs_feat', type=int, default=3)
     parser.add_argument('--window_size', type=int, default=0)
