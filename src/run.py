@@ -84,23 +84,49 @@ def main(configs):
         gfs_id_test = gfs_test[:, :3, lat_id_low:lat_id_low + 112, lon_id_left:lon_id_left + 112]
         del gfs_train, gfs_test
     print('.............................................................')
-    
+
+    p_train = np.load(configs.inputs_path+'GFS_0p1_f3_p_interp_2015-2017.npy')
+    p_id_train = p_train[:, :3, lat_id_low:lat_id_low + 112, lon_id_left:lon_id_left + 112]
+    p_test = np.load(configs.inputs_path+'GFS_0p1_f3_p_interp_2018.npy')
+    p_id_test = p_test[:, :3, lat_id_low:lat_id_low + 112, lon_id_left:lon_id_left + 112]
+    del p_train, p_test
 
     # generate input/output for DL models
     print('[HybridHydro] Making input data for {} model'.format(configs.model_name))
     data_manager = DataLoader(configs)
 
     if configs.model_name == 'convlstm':
-        X, y = data_manager([x_train, x_test], [y_train, y_test])
+        X, y,_ = data_manager([x_train, x_test], [y_train, y_test])
     elif configs.model_name == 'convlstm_drive':
         x_train = np.concatenate([x_train, gfs_id_train], axis=1)
         x_test = np.concatenate([x_test, gfs_id_test], axis=1)
-        X, y = data_manager([x_train, x_test], [y_train, y_test])
-    elif configs.model_name in ['convlstm_condition', 'convlstm_linear_att_condition','convlstm_se_att_condition']:
+        X, y,_ = data_manager([x_train, x_test], [y_train, y_test])
+    elif configs.model_name in \
+        ['convlstm_condition', 'convlstm_linear_att_condition','convlstm_se_att_condition']:
         # construct GFS inputs only for decoder 
-        X, y = data_manager([x_train, x_test], [y_train, y_test])
-        _, X_tf = data_manager([x_train, x_test], [gfs_id_train, gfs_id_test]) 
+        X, y,_ = data_manager([x_train, x_test], [y_train, y_test])
+        _, X_tf,_ = data_manager([x_train, x_test], [gfs_id_train, gfs_id_test]) 
         X = [[X[0], X_tf[0]], [X[1], X_tf[1]]]
+    elif configs.model_name == 'convlstm_condition_forcing':
+        X, y, z = data_manager([x_train, x_test], [y_train, y_test])
+        X = [[X[0], z[0]], [X[1], z[1]]]
+    elif configs.model_name == 'convlstm_condition_forcing_gfs':
+        X, y, z = data_manager([x_train, x_test], [y_train, y_test])
+        _, X_tf,_ = data_manager([x_train, x_test], [gfs_id_train, gfs_id_test]) 
+        m1 = np.concatenate([X_tf[0],z[0]], axis=-1) 
+        m2 = np.concatenate([X_tf[1],z[1]], axis=-1) 
+        X = [[X[0], m1], [X[1], m2]]
+    elif configs.model_name == 'convlstm_condition_p':
+        X, y, _ = data_manager([x_train, x_test], [y_train, y_test])
+        _, X_tf, _ = data_manager([x_train, x_test], [p_id_train, p_id_test]) 
+        X = [[X[0], X_tf[0]], [X[1], X_tf[1]]]
+    elif configs.model_name == 'convlstm_condition_p_gfs':
+        X, y, _ = data_manager([x_train, x_test], [y_train, y_test])
+        _, X_p_tf, _ = data_manager([x_train, x_test], [p_id_train, p_id_test]) 
+        _, X_gfs_tf, _ = data_manager([x_train, x_test], [gfs_id_train, gfs_id_test]) 
+        m1 = np.concatenate([X_p_tf[0],X_gfs_tf[0]], axis=-1) 
+        m2 = np.concatenate([X_p_tf[1],X_gfs_tf[1]], axis=-1) 
+        X = [[X[0], m1], [X[1], m2]]
 
     print('[HybridHydro] Training samples shape: {}'.format(y[0].shape[0]))
     print('[HybridHydro] Testing samples shape: {}'.format(y[1].shape[0]))

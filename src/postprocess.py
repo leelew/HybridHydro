@@ -1,9 +1,11 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import glob
-import xarray as xr
-import netCDF4 as nc
 import os
+
+import matplotlib.pyplot as plt
+import netCDF4 as nc
+import numpy as np
+import xarray as xr
+
 from config import parse_args
 
 

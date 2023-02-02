@@ -11,6 +11,7 @@ def make_Xy(inputs,
     if use_lag_y and outputs is not None: 
         inputs = np.concatenate([inputs, outputs], axis=1)
 
+    inputs_cond = inputs[:,:-1]
     # get shape: (t,feat,lat,lon)-(t,out,lat,lon)
     Nt, Nf, Nlat, Nlon = inputs.shape
     _, No, _, _ = outputs.shape
@@ -39,9 +40,15 @@ def make_Xy(inputs,
         outputs = np.take(outputs, output_batch_idx, axis=0). \
             reshape(batch_size,  len_output,  No, Nlat, Nlon)
         outputs = np.transpose(outputs, [0, 1, 3, 4, 2])
+    
+        inputs_cond = np.take(inputs_cond, output_batch_idx, axis=0).\
+            reshape(batch_size, len_output, Nf-1, Nlat, Nlon)
+        inputs_cond = np.transpose(inputs_cond, [0, 1, 3, 4, 2])
     else:
         outputs=None
-    return inputs, outputs
+        inputs_cond=None
+    print(inputs.shape, outputs.shape, inputs_cond.shape)
+    return inputs, outputs, inputs_cond
 
 
 
@@ -64,12 +71,14 @@ class DataLoader():
               len_in,lat,lon,feat)-(t,len_out,lat,lon,feat)
               in two pair list.
         """
+        z = []
         for i in range(len(X)):
-            _x, _y = make_Xy(X[i], 
+            _x, _y, _z = make_Xy(X[i], 
                              y[i],
                              self.len_input, 
                              self.len_output, 
                              self.window_size,
                              self.use_lag_y)
             X[i], y[i] = _x, _y
-        return X, y
+            z.append(_z)
+        return X, y, z

@@ -17,8 +17,6 @@ def parse_args():
     parser.add_argument('--lon_left', type=int, default=72.3)
     parser.add_argument('--lon_right', type=int, default=135)
 
-
-
     # data params
     parser.add_argument('--len_input', type=int, default=7)
     parser.add_argument('--len_out',type=int, default=16)
@@ -50,7 +48,7 @@ def parse_args():
     parser.add_argument('--kernel_size', type=int, default=5)
     parser.add_argument('--padding', type=str, default='same')
     parser.add_argument('--kernel_initializer', type=str, default='he_normal')
-    parser.add_argument('--model_name', type=str, default='convlstm')
+    parser.add_argument('--model_name', type=str, default='convlstm_condition_p_gfs')
     parser.add_argument('--validation_split', type=float,default=0.2)
     parser.add_argument('--shuffle_times', type=int,default=10000)
 

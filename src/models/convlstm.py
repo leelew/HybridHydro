@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras import Input, backend
-from tensorflow.keras.layers import (Lambda, ConvLSTM2D, Input, Dense, GlobalAveragePooling2D,
-                                     Multiply)
+from tensorflow.keras.layers import (ConvLSTM2D, Dense, GlobalAveragePooling2D,
+                                     Input, Lambda, Multiply)
 from tensorflow.keras.models import Model
 
 
@@ -349,6 +349,298 @@ def convlstm_linear_att_condition(configs):
                                    return_sequences=True,
                                    dropout=configs.dropout_rate,
                                    activation='elu',)(x, initial_state=[h, c])
+        outs.append(outputs)
+    outputs = tf.concat(outs, axis=1)
+    out = Dense(1)(outputs)
+
+    mdl = Model([inputs, inputs_cond], out)
+    mdl.summary()
+    return mdl
+
+
+
+def convlstm_condition_forcing(configs):
+    # default encoder-decoder ConvLSTM
+    inputs = Input(shape=(configs.len_input, 
+                         configs.h_w, 
+                         configs.h_w, 
+                         configs.n_forcing_feat+1))
+    inputs_cond = Input(shape=(configs.len_out,
+                               configs.h_w,
+                               configs.h_w,
+                               configs.n_forcing_feat))
+
+    # encoder
+    outputs = ConvLSTM2D(
+                 8*configs.n_filters_factor, 
+                 configs.kernel_size, 
+                 padding=configs.padding, 
+                 kernel_initializer=configs.kernel_initializer, 
+                 return_state=False,
+                 activation='elu',
+                 recurrent_initializer='orthogonal',
+                 return_sequences=True,
+                 dropout=configs.dropout_rate)(inputs)
+
+    if configs.stats_hs > 0:
+        for i in range(configs.stats_hs):
+            outputs = ConvLSTM2D(
+                8*configs.n_filters_factor,
+                configs.kernel_size,
+                padding=configs.padding,
+                kernel_initializer=configs.kernel_initializer,
+                return_state=False,
+                activation='elu',
+                recurrent_initializer='orthogonal',
+                return_sequences=True,
+                dropout=configs.dropout_rate)(outputs)
+
+    outputs, h, c = ConvLSTM2D(
+                8*configs.n_filters_factor, 
+                configs.kernel_size, 
+                padding=configs.padding, 
+                kernel_initializer=configs.kernel_initializer, 
+                activation='elu',
+                recurrent_initializer='orthogonal',
+                return_sequences=False,
+                dropout=configs.dropout_rate,
+                return_state=True)(outputs)
+    outputs = tf.expand_dims(outputs, axis=1)
+
+    # decoder
+    outs = []
+    for i in range(configs.len_out):
+        outputs, h, c = ConvLSTM2D(
+                8*configs.n_filters_factor,
+                configs.kernel_size,
+                padding=configs.padding,
+                kernel_initializer=configs.kernel_initializer,
+                return_state=True,
+                activation='elu',
+                recurrent_initializer='orthogonal',
+                return_sequences=False,
+                dropout=configs.dropout_rate)(inputs_cond[:,i:i+1], initial_state=[h, c])
+        print(tf.shape(outputs))
+        outputs = tf.expand_dims(outputs, axis=1)
+        outs.append(outputs)
+    outputs = tf.concat(outs, axis=1)
+    out = Dense(1)(outputs)
+
+    mdl = Model([inputs, inputs_cond], out)
+    mdl.summary()
+    return mdl
+
+
+def convlstm_condition_forcing_gfs(configs):
+    # GFS conditioned encoder-decoder convlstm
+    inputs = Input(shape=(configs.len_input,
+                          configs.h_w,
+                          configs.h_w,
+                          configs.n_forcing_feat+1))  # 7, 112, 112, ..
+    inputs_cond = Input(shape=(configs.len_out,
+                               configs.h_w,
+                               configs.h_w,
+                               configs.n_gfs_feat+configs.n_forcing_feat))  # 16, 112, 112, 3+
+
+    # encoder
+    outputs = ConvLSTM2D(
+        8*configs.n_filters_factor,
+        configs.kernel_size,
+        padding=configs.padding,
+        kernel_initializer=configs.kernel_initializer,
+        return_state=False,
+        activation='elu',
+        recurrent_initializer='orthogonal',
+        return_sequences=True,
+        dropout=configs.dropout_rate)(inputs)
+
+    if configs.stats_hs > 0:
+        for i in range(configs.stats_hs):
+            outputs = ConvLSTM2D(
+                8*configs.n_filters_factor,
+                configs.kernel_size,
+                padding=configs.padding,
+                kernel_initializer=configs.kernel_initializer,
+                return_state=False,
+                activation='elu',
+                recurrent_initializer='orthogonal',
+                return_sequences=True,
+                dropout=configs.dropout_rate)(outputs)
+
+    outputs, h, c = ConvLSTM2D(
+                8*configs.n_filters_factor, 
+                configs.kernel_size, 
+                padding=configs.padding, 
+                kernel_initializer=configs.kernel_initializer, 
+                activation='elu',
+                recurrent_initializer='orthogonal',
+                return_sequences=False,
+                dropout=configs.dropout_rate,
+                return_state=True)(outputs)
+    outputs = tf.expand_dims(outputs, axis=1)
+
+    # decoder
+    outs = []
+    for i in range(configs.len_out):
+        outputs, h, c = ConvLSTM2D(
+                8*configs.n_filters_factor,
+                configs.kernel_size,
+                padding=configs.padding,
+                kernel_initializer=configs.kernel_initializer,
+                return_state=True,
+                activation='elu',
+                recurrent_initializer='orthogonal',
+                return_sequences=False,
+                dropout=configs.dropout_rate)(inputs_cond[:,i:i+1], initial_state=[h, c])
+        print(tf.shape(outputs))
+        outputs = tf.expand_dims(outputs, axis=1)
+        outs.append(outputs)
+    outputs = tf.concat(outs, axis=1)
+    out = Dense(1)(outputs)
+
+    mdl = Model([inputs, inputs_cond], out)
+    mdl.summary()
+
+    return mdl
+
+
+
+
+def convlstm_condition_p(configs):
+    # default encoder-decoder ConvLSTM
+    inputs = Input(shape=(configs.len_input, 
+                         configs.h_w, 
+                         configs.h_w, 
+                         configs.n_forcing_feat+1))
+    inputs_cond = Input(shape=(configs.len_out,
+                               configs.h_w,
+                               configs.h_w,
+                               configs.n_gfs_feat))
+
+    # encoder
+    outputs = ConvLSTM2D(
+                 8*configs.n_filters_factor, 
+                 configs.kernel_size, 
+                 padding=configs.padding, 
+                 kernel_initializer=configs.kernel_initializer, 
+                 return_state=False,
+                 activation='elu',
+                 recurrent_initializer='orthogonal',
+                 return_sequences=True,
+                 dropout=configs.dropout_rate)(inputs)
+
+    if configs.stats_hs > 0:
+        for i in range(configs.stats_hs):
+            outputs = ConvLSTM2D(
+                8*configs.n_filters_factor,
+                configs.kernel_size,
+                padding=configs.padding,
+                kernel_initializer=configs.kernel_initializer,
+                return_state=False,
+                activation='elu',
+                recurrent_initializer='orthogonal',
+                return_sequences=True,
+                dropout=configs.dropout_rate)(outputs)
+
+    outputs, h, c = ConvLSTM2D(
+                8*configs.n_filters_factor, 
+                configs.kernel_size, 
+                padding=configs.padding, 
+                kernel_initializer=configs.kernel_initializer, 
+                activation='elu',
+                recurrent_initializer='orthogonal',
+                return_sequences=False,
+                dropout=configs.dropout_rate,
+                return_state=True)(outputs)
+    outputs = tf.expand_dims(outputs, axis=1)
+
+    # decoder
+    outs = []
+    for i in range(configs.len_out):
+        outputs, h, c = ConvLSTM2D(
+                8*configs.n_filters_factor,
+                configs.kernel_size,
+                padding=configs.padding,
+                kernel_initializer=configs.kernel_initializer,
+                return_state=True,
+                activation='elu',
+                recurrent_initializer='orthogonal',
+                return_sequences=False,
+                dropout=configs.dropout_rate)(inputs_cond[:,i:i+1], initial_state=[h, c])
+        print(tf.shape(outputs))
+        outputs = tf.expand_dims(outputs, axis=1)
+        outs.append(outputs)
+    outputs = tf.concat(outs, axis=1)
+    out = Dense(1)(outputs)
+
+    mdl = Model([inputs, inputs_cond], out)
+    mdl.summary()
+    return mdl
+
+
+def convlstm_condition_p_gfs(configs):
+    # default encoder-decoder ConvLSTM
+    inputs = Input(shape=(configs.len_input, 
+                         configs.h_w, 
+                         configs.h_w, 
+                         configs.n_forcing_feat+1))
+    inputs_cond = Input(shape=(configs.len_out,
+                               configs.h_w,
+                               configs.h_w,
+                               2*configs.n_gfs_feat))
+
+    # encoder
+    outputs = ConvLSTM2D(
+                 8*configs.n_filters_factor, 
+                 configs.kernel_size, 
+                 padding=configs.padding, 
+                 kernel_initializer=configs.kernel_initializer, 
+                 return_state=False,
+                 activation='elu',
+                 recurrent_initializer='orthogonal',
+                 return_sequences=True,
+                 dropout=configs.dropout_rate)(inputs)
+
+    if configs.stats_hs > 0:
+        for i in range(configs.stats_hs):
+            outputs = ConvLSTM2D(
+                8*configs.n_filters_factor,
+                configs.kernel_size,
+                padding=configs.padding,
+                kernel_initializer=configs.kernel_initializer,
+                return_state=False,
+                activation='elu',
+                recurrent_initializer='orthogonal',
+                return_sequences=True,
+                dropout=configs.dropout_rate)(outputs)
+
+    outputs, h, c = ConvLSTM2D(
+                8*configs.n_filters_factor, 
+                configs.kernel_size, 
+                padding=configs.padding, 
+                kernel_initializer=configs.kernel_initializer, 
+                activation='elu',
+                recurrent_initializer='orthogonal',
+                return_sequences=False,
+                dropout=configs.dropout_rate,
+                return_state=True)(outputs)
+    outputs = tf.expand_dims(outputs, axis=1)
+
+    # decoder
+    outs = []
+    for i in range(configs.len_out):
+        outputs, h, c = ConvLSTM2D(
+                8*configs.n_filters_factor,
+                configs.kernel_size,
+                padding=configs.padding,
+                kernel_initializer=configs.kernel_initializer,
+                return_state=True,
+                activation='elu',
+                recurrent_initializer='orthogonal',
+                return_sequences=False,
+                dropout=configs.dropout_rate)(inputs_cond[:,i:i+1], initial_state=[h, c])
+        print(tf.shape(outputs))
+        outputs = tf.expand_dims(outputs, axis=1)
         outs.append(outputs)
     outputs = tf.concat(outs, axis=1)
     out = Dense(1)(outputs)
