@@ -84,15 +84,6 @@ NOTES: The paper is not accepted yet.
 
 In case you use HybridHydro in your research or work, please cite this GitHub codes:
 
-```bibtex
-@article{Lu Li,
-    author = {Lu Li, Yongjiu Dai et al.},
-    title = {Soil Moisture Forecasting integrating Physical-based Model with Deep Learning},
-    journal = {Journal of Hydrometeorlogy},
-    year = {2022}
-}
-```
-
 ### [License](https://github.com/leelew/HybridHydro/LICENSE)
 
 Copyright (c) 2022, Lu Li
