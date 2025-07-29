@@ -80,9 +80,17 @@ HybridHydro has five edition, shown in different branchs.
 
 ### Citation
 
-NOTES: The paper is not accepted yet. 
+In case you use HybridHydro in your research or work, please cite:
 
-In case you use HybridHydro in your research or work, please cite this GitHub codes:
+```bibtex
+@article{Lu Li,
+    author = {Lu Li, Yongjiu Dai et al.},
+    title = {Enhancing Deep Learning Soil Moisture Forecasting Models by Integrating Physics-based Models},
+    journal = {Advances in Atompsheric Sciences},
+    year = {2024},
+    DOI = {https://doi.org/10.1007/s00376-023-3181-8}
+}
+```
 
 ### [License](https://github.com/leelew/HybridHydro/LICENSE)
 
